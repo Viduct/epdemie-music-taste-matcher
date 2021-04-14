@@ -2,15 +2,15 @@ import { forEach } from 'lodash-es';
 import { ALBUM_DATA_FILE, MAX_POINTS, SONG_DATA_FILE } from './constants.js';
 import { readFile, sortRatingsPerPerson } from './util.js';
 
-const calculateMatchPercentage = (songsDudeA, songsDudeB) => {
+const calculateMatchPercentage = (songsPersonA, songsPersonB) => {
     let result = 0;
 
-    forEach(songsDudeA, (ratingA, songA) => {
-        if (!Object.keys(songsDudeB).includes(songA)) {
+    forEach(songsPersonA, (ratingA, songA) => {
+        if (!Object.keys(songsPersonB).includes(songA)) {
             return;
         }
 
-        const ratingB = songsDudeB[songA];
+        const ratingB = songsPersonB[songA];
 
         let higherRating = Math.max(ratingA, ratingB);
         let lowerRating = Math.min(ratingA, ratingB);
@@ -21,23 +21,23 @@ const calculateMatchPercentage = (songsDudeA, songsDudeB) => {
     return Math.round((result / MAX_POINTS) * 10000) / 100; // Round to two decimal points
 };
 
-const calculateMatches = (ratingsPerDude) => {
+const calculateMatches = (ratingsPerPerson) => {
     const compatibility = [];
 
-    forEach(ratingsPerDude, (songsDudeA, dudeAKey) => {
-        forEach(ratingsPerDude, (songsDudeB, dudeBKey) => {
+    forEach(ratingsPerPerson, (songsPersonA, namePersonA) => {
+        forEach(ratingsPerPerson, (songsPersonB, namePersonB) => {
             // Generate name of pairing (ans sort them alphabetically)
-            const pair = [dudeAKey, dudeBKey].sort().join(' and ');
+            const pair = [namePersonA, namePersonB].sort().join(' and ');
             const existingPairing = compatibility.find((item) => item.pair === pair);
 
-            // Don't calculate the compatibility for a dude with him/herself
-            if (dudeAKey === dudeBKey || existingPairing) {
+            // Don't calculate the compatibility for a person with him/herself
+            if (namePersonA === namePersonB || existingPairing) {
                 return;
             }
 
             compatibility.push({
                 pair,
-                percentage: calculateMatchPercentage(songsDudeA, songsDudeB)
+                percentage: calculateMatchPercentage(songsPersonA, songsPersonB)
             });
         });
     });
