@@ -1,22 +1,20 @@
-import { forEach } from 'lodash-es';
+import { forEach, reduce } from 'lodash-es';
 import { ALBUM_DATA_FILE, MAX_POINTS, SONG_DATA_FILE } from './constants.js';
 import { readFile, sortRatingsPerPerson } from './util.js';
 
 const calculateMatchPercentage = (songsPersonA, songsPersonB) => {
-    let result = 0;
-
-    forEach(songsPersonA, (ratingA, songA) => {
+    const result = reduce(songsPersonA, (sum, ratingA, songA) => {
         if (!Object.keys(songsPersonB).includes(songA)) {
-            return;
+            return sum + 0;
         }
 
         const ratingB = songsPersonB[songA];
 
-        let higherRating = Math.max(ratingA, ratingB);
-        let lowerRating = Math.min(ratingA, ratingB);
+        const higherRating = Math.max(ratingA, ratingB);
+        const lowerRating = Math.min(ratingA, ratingB);
 
-        result += (lowerRating / higherRating) * 100;
-    });
+        return sum + (lowerRating / higherRating) * 100;
+    }, 0);
 
     return Math.round((result / MAX_POINTS) * 10000) / 100; // Round to two decimal points
 };
@@ -45,8 +43,8 @@ const calculateMatches = (ratingsPerPerson) => {
     return compatibility.sort((a, b) => a.percentage - b.percentage);
 };
 
-const calculate = async (fileName, title) => {
-    const songData = await readFile(fileName);
+const calculate = async (filePath, title) => {
+    const songData = await readFile(filePath);
 
     const sortedSongData = sortRatingsPerPerson(songData);
     const result = calculateMatches(sortedSongData);

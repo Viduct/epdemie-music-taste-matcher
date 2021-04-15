@@ -1,5 +1,11 @@
 import { promises } from 'fs';
 
+export const readFile = async (path) => {
+    return JSON.parse(await promises.readFile(path, 'utf8').catch((error) => {
+        console.error(error);
+    }));
+};
+
 const normalizeRating = (rating) => {
     switch (rating) {
         case 14:
@@ -9,12 +15,6 @@ const normalizeRating = (rating) => {
     }
 
     return rating;
-};
-
-export const readFile = async (path) => {
-    return JSON.parse(await promises.readFile(path, 'utf8').catch((error) => {
-        console.error(error);
-    }));
 };
 
 export const sortRatingsPerPerson = (data) => {
